@@ -8,25 +8,25 @@
 
 ```mermaid
 graph TD
-    subgraph 用户端 (Browser)
-        A[前端 UI (React/Vue)]
-        B[浏览器钱包 (MetaMask)]
+    subgraph "用户端 (Browser)"
+        A["前端 UI (React/Vue)"]
+        B["浏览器钱包 (MetaMask)"]
     end
     
-    subgraph 开发者服务
-        C[后端服务 (Go)]
-        D[数据库 (PostgreSQL/MongoDB)]
-        E[区块链节点 (Infura/Alchemy)]
+    subgraph "开发者服务"
+        C["后端服务 (Go)"]
+        D["数据库 (PostgreSQL/MongoDB)"]
+        E["区块链节点 (Infura/Alchemy)"]
     end
     
-    F[区块链 (Ethereum)]
+    F["区块链 (Ethereum)"]
 
-    A --> B: 请求签名/发送交易
-    A --> C: 请求链下数据/缓存
-    B --> F: 发送签名后的交易
-    C --> D: 读/写数据
-    C --> E: 查询链上信息/发送交易
-    E --> F: 与区块链交互
+    A -->|"请求签名/发送交易"| B
+    A -->|"请求链下数据/缓存"| C
+    B -->|"发送签名后的交易"| F
+    C -->|"读/写数据"| D
+    C -->|"查询链上信息/发送交易"| E
+    E -->|"与区块链交互"| F
 ```
 
 **核心组件说明:**
