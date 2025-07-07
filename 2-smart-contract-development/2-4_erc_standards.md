@@ -2,7 +2,7 @@
 
 以太坊的强大之处在于其可组合性——不同的智能合约可以像乐高积木一样相互交互。这种互操作性的基石是 **ERC (Ethereum Request for Comment)** 标准。ERC 是以太坊社区采纳的应用级标准，定义了一系列通用接口，使得钱包、交易所、DApp 等应用可以与不同开发者编写的合约进行统一的交互。
 
-本章将重点介绍两个最著名、最重要的 ERC 标准：ERC-20 (同质化代币) 和 ERC-721 (非同质化代币/NFT)。
+本章将重点介绍三个最著名、最重要的 ERC 标准：ERC-20 (同质化代币)、ERC-721 (非同质化代币/NFT) 和 ERC-1155 (多代币标准)。
 
 ## 1. ERC-20: 同质化代币标准
 
@@ -95,6 +95,43 @@ function tokenURI(uint256 _tokenId) external view returns (string); // 返回一
 ```
 像 OpenSea 这样的 NFT 市场就是通过解析这个 JSON 文件来展示 NFT 的图片和属性的。
 
+## 3. ERC-1155: 多代币标准 (Multi-Token Standard)
+
+ERC-1155 是一个革命性的代币标准，它允许在一个单一的智能合约中同时管理多种类型的代币，包括同质化代币（如金币）、非同质化代币（如一把独特的剑）和半同质化代币。这个标准最初由 Enjin 团队为游戏行业设计，旨在解决在游戏中需要管理成千上万种不同道具而导致合约泛滥的问题。
+
+想象一下，一个游戏需要有金币（同质化）、普通的长剑（同质化）、以及一把独一无二的"屠龙宝刀"（非同质化）。如果使用传统标准，你可能需要为金币部署一个 ERC-20 合约，为长剑部署另一个 ERC-20 合约，再为"屠龙宝刀"部署一个 ERC-721 合约。而使用 ERC-1155，你只需要一个合约就能管理所有这些资产。
+
+### 3.1 核心优势与概念
+
+- **高效率**: 在一个合约中管理多个代币，极大地减少了部署和管理的复杂性，节省了区块链空间。
+- **批量操作**: ERC-1155 原生支持批量查询余额（`balanceOfBatch`）和批量转移（`safeBatchTransferFrom`），可以在一笔交易中完成多个代币的转移，显著降低了交易成本（Gas Fee）。
+- **ID 标识**: 合约通过一个 `uint256` 类型的 `id` 来区分不同的代币。例如，`id=1` 可能代表金币，`id=2` 代表长剑，`id=3` 代表屠龙宝刀。
+- **混合类型**:
+    - 如果一个 `id` 的总供应量大于 1，它表现得就像一个 **ERC-20** 代币。
+    - 如果一个 `id` 的总供应量等于 1，它表现得就像一个 **ERC-721** 代币。
+
+### 3.2 ERC-1155 核心接口
+
+ERC-1155 的接口设计以批量操作为核心。
+
+```solidity
+// 函数
+function balanceOf(address _owner, uint256 _id) public view returns (uint256) // 查询单个代币的余额
+function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) public view returns (uint256[] memory) // 批量查询余额
+function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _amount, bytes calldata _data) public // 转移单个代币
+function safeBatchTransferFrom(address _from, address _to, uint256[] calldata _ids, uint256[] calldata _amounts, bytes calldata _data) public // 批量转移代币
+function setApprovalForAll(address _operator, bool _approved) public // 授权给某个地址操作你所有代币的权限
+function isApprovedForAll(address _owner, address _operator) public view returns (bool) // 查询是否已授权
+
+// 事件
+event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
+event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
+event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+event URI(string _value, uint256 indexed _id);
+```
+
+注意，ERC-1155 没有像 ERC-20 那样的 `approve` + `transferFrom` 机制，而是采用了与 ERC-721 类似的 `setApprovalForAll` 授权模式。元数据也通过 `URI` 事件和对应的 `uri` 函数来处理。
+
 ---
 
-**总结**: ERC-20 和 ERC-721 是以太坊生态的基石。理解它们的工作原理，对于开发与代币或 NFT 相关的任何 DApp 都至关重要。幸运的是，我们通常不需要从零开始实现这些标准，[OpenZeppelin](https://www.openzeppelin.com/contracts) 提供了一系列经过安全审计的、模块化的标准合约实现，我们可以直接继承和使用。 
+**总结**: ERC-20, ERC-721 和 ERC-1155 是以太坊生态的基石。理解它们的工作原理，对于开发与代币或 NFT 相关的任何 DApp 都至关重要。幸运的是，我们通常不需要从零开始实现这些标准，[OpenZeppelin](https://www.openzeppelin.com/contracts) 提供了一系列经过安全审计的、模块化的标准合约实现，我们可以直接继承和使用。 
